@@ -93,7 +93,7 @@ public class TokenMgrError extends Error
   /**
    * Returns a detailed message for the Error when it is thrown by the
    * token manager to indicate a lexical error.
-   * Parameters :
+   * SymbolTypes.Parameters :
    *    EOFSeen     : indicates if EOF caused the lexical error
    *    curLexState : lexical state in which this error occurred
    *    errorLine   : line number when the error occurred

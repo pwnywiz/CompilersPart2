@@ -13,10 +13,15 @@ class Main {
 			fis = new FileInputStream(args[0]);
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			System.err.println("Program parsed successfully.");
-			FirstVisitor first = new FirstVisitor();
 			Goal root = parser.Goal();
+
+			ClassVisitor first = new ClassVisitor();
 			root.accept(first, null);
-			System.out.println("Checking finished");
+
+			SymbolVisitor second = new SymbolVisitor(first.getClassMap());
+			root.accept(second, null);
+
+			System.out.println("Checking ended successfully");
 		}
 		catch(ParseException ex){
 			System.out.println(ex.getMessage());
@@ -24,7 +29,7 @@ class Main {
 		catch(FileNotFoundException ex){
 			System.err.println(ex.getMessage());
 		} catch (Exception e) {
-			System.out.println("Semantics Error.");
+			System.out.println("Exception Error");
 			System.out.println();
 		} finally {
 			try {
