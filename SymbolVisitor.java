@@ -5,10 +5,13 @@ import java.util.HashMap;
 
 public class SymbolVisitor extends GJDepthFirst<String,String> {
     HashMap<String,String> ClassMap;
-    HashMap<String,HashMap<String,Variables>> VariablesMap = new HashMap<String,HashMap<String,Variables>>();
-    HashMap<String,HashMap<String,Methods>> MethodsMap = new HashMap<String,HashMap<String,Methods>>();
+    HashMap<String,SymbolTable> symboltable = new HashMap<String,SymbolTable>();
 
-    SymbolVisitor(HashMap<String,String> ClassMap) throws Exception{
+    public HashMap<String,SymbolTable> getSymboltable() {
+        return symboltable;
+    }
+
+    public SymbolVisitor(HashMap<String,String> ClassMap) throws Exception{
         this.ClassMap = ClassMap;
     }
 }
