@@ -15,12 +15,14 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
 
     HashMap<String,Variables> VariablesMap;
     HashMap<String,Methods> MethodsMap;
+    String inClass = null;
+    String inMethod = null;
     ArrayList<NamedVariables> args;
     SymbolTable symbol;
     Methods method;
+    Variables var;
     String storedClass;
     String varType;
-    String var;
 
     public HashMap<String,SymbolTable> getSymboltable() {
         return symboltable;
@@ -70,9 +72,11 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
         VariablesMap = new HashMap<String,Variables>();
         MethodsMap = new HashMap<String,Methods>();
 
+        inClass = "yes";
         n.f3.accept(this,this.storedClass);
         n.f4.accept(this,this.storedClass);
         // Add the outcome to the SymbolTable
+        inClass = null;
 
         return null;
     }
@@ -107,7 +111,27 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
      */
 
     public String visit(VarDeclaration n, String storedClass) throws Exception {
-        // Put a call type String to know if its a class or a method calling this (check instanceof)
+        String varType = n.f0.accept(this,null);
+        String varName = n.f1.f0.toString();
+        var.setIsVar(true);
+        var.setVarType(varType);
+
+        if (!varType.equals("boolean") && !varType.equals("int") && !varType.equals("int[]") && !ClassMap.containsKey(varType)) {
+            System.out.println("Unknown type declaration with name '" + varType + "'");
+            throw new Exception();
+        }
+        if (inClass != null) {
+            if (this.VariablesMap.containsKey(varName)) {
+                System.out.println("Duplicate variable declaration with name '" + varName + "' in class '" + storedClass + "'");
+                throw new Exception();
+            }
+
+            VariablesMap.put(varName,var);
+        }
+        else if (inMethod != null) {
+            
+        }
+
         return null;
     }
 }

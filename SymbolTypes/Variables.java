@@ -1,22 +1,22 @@
 package SymbolTypes;
 
 public class Variables {
-    String returnType;
+    boolean isVar;   // Variable or Argument
     String varType;
 
-//    public String getVarType() {
-//        return varType;
-//    }
-//
-//    public String getRetType() {
-//        return returnType;
-//    }
-//
-//    public void setRetType(String retType) {
-//        this.returnType = retType;
-//    }
-//
-//    public void setVarType(String varType) {
-//        this.varType = varType;
-//    }
+    public String getVarType() {
+        return varType;
+    }
+
+    public boolean getIsVar() {
+        return isVar;
+    }
+
+    public void setIsVar(boolean isVar) {
+        this.isVar = isVar;
+    }
+
+    public void setVarType(String varType) {
+        this.varType = varType;
+    }
 }
