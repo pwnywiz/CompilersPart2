@@ -1,7 +1,4 @@
-import syntaxtree.ClassDeclaration;
-import syntaxtree.ClassExtendsDeclaration;
-import syntaxtree.MainClass;
-import syntaxtree.VarDeclaration;
+import syntaxtree.*;
 import visitor.GJDepthFirst;
 
 import SymbolTypes.*;
@@ -113,6 +110,7 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
     public String visit(VarDeclaration n, String storedName) throws Exception {
         String varType = n.f0.accept(this,null);
         String varName = n.f1.f0.toString();
+        var = new Variables();
         var.setIsVar(true);
         var.setVarType(varType);
 
@@ -140,7 +138,41 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
             MethodsMap.put(storedName,temp);
         }
 
-        System.out.println("awadwa");
+        return null;
+    }
+
+    /**
+     * f0 -> "public"
+     * f1 -> Type()
+     * f2 -> Identifier()
+     * f3 -> "("
+     * f4 -> ( FormalParameterList() )?
+     * f5 -> ")"
+     * f6 -> "{"
+     * f7 -> ( VarDeclaration() )*
+     * f8 -> ( Statement() )*
+     * f9 -> "return"
+     * f10 -> Expression()
+     * f11 -> ";"
+     * f12 -> "}"
+     */
+    public String visit(MethodDeclaration n, String storedName) throws Exception {
+        String methodType = n.f1.accept(this,null);
+        String methodName = n.f2.f0.toString();
+        Methods temp = new Methods();
+        args = new ArrayList<NamedVariables>();
+
+        if (!methodType.equals("boolean") && !methodType.equals("int") && !methodType.equals("int[]") && !ClassMap.containsKey(methodType)) {
+            System.out.println("Unknown return type with name '" + methodType + "'");
+            throw new Exception();
+        }
+        if (this.MethodsMap.containsKey(methodName)) {
+            System.out.println("Duplicate method declaration with name '" + methodName + "' in class '" + storedName + "'");
+            throw new Exception();
+        }
+
+        n.f4.accept(this,null);
+
         return null;
     }
 }
