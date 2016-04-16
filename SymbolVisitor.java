@@ -110,7 +110,7 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
      * f2 -> ";"
      */
 
-    public String visit(VarDeclaration n, String storedClass) throws Exception {
+    public String visit(VarDeclaration n, String storedName) throws Exception {
         String varType = n.f0.accept(this,null);
         String varName = n.f1.f0.toString();
         var.setIsVar(true);
@@ -122,14 +122,22 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
         }
         if (inClass != null) {
             if (this.VariablesMap.containsKey(varName)) {
-                System.out.println("Duplicate variable declaration with name '" + varName + "' in class '" + storedClass + "'");
+                System.out.println("Duplicate variable declaration with name '" + varName + "' in class '" + storedName + "'");
                 throw new Exception();
             }
 
             VariablesMap.put(varName,var);
         }
         else if (inMethod != null) {
-            
+            Methods temp = this.MethodsMap.get(storedName);
+
+            if (temp.dupCheck(varName)) {
+                System.out.println("Duplicate variable declaration with name '" + varName + "' in method '" + storedName + "'");
+                throw new Exception();
+            }
+
+            temp.vars.put(varName,var);
+            MethodsMap.put(storedName,temp);
         }
 
         return null;

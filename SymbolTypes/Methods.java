@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Methods {
-    String returnType;
-    HashMap<String,Variables> vars = new HashMap<String,Variables>();
-    ArrayList<NamedVariables> args = new ArrayList<NamedVariables>();
+    public String returnType;
+    public HashMap<String,Variables> vars = new HashMap<String,Variables>();
+    public ArrayList<NamedVariables> args = new ArrayList<NamedVariables>();
 
     public boolean dupCheck(String varName) {
         for (NamedVariables temp : args) {
