@@ -140,6 +140,7 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
             MethodsMap.put(storedName,temp);
         }
 
+        System.out.println("awadwa");
         return null;
     }
 }
