@@ -15,7 +15,6 @@ public class ClassVisitor extends GJDepthFirst<String,String>{
      * f1 -> ( TypeDeclaration() )*
      * f2 -> <EOF>
      */
-
     public String visit(Goal n, String argu) throws Exception {
         n.f0.accept(this,null);
         n.f1.accept(this,null);
@@ -42,7 +41,6 @@ public class ClassVisitor extends GJDepthFirst<String,String>{
      * f16 -> "}"
      * f17 -> "}"
      */
-
     public String visit(MainClass n, String argu) throws Exception {
         if (MainVisited) {
             System.out.println("More than one main methods");
@@ -50,7 +48,6 @@ public class ClassVisitor extends GJDepthFirst<String,String>{
         }
         MainVisited = true;
         this.ClassMap.put(n.f1.f0.toString(),null);
-        // Might need to accept f14
 
         return null;
     }
@@ -63,7 +60,6 @@ public class ClassVisitor extends GJDepthFirst<String,String>{
      * f4 -> ( MethodDeclaration() )*
      * f5 -> "}"
      */
-
     public String visit(ClassDeclaration n, String argu) throws Exception {
         if (this.ClassMap.containsKey(n.f1.f0.toString())) {
             System.out.println("Class name '" + n.f1.f0.toString() + "' already exists");
@@ -84,7 +80,6 @@ public class ClassVisitor extends GJDepthFirst<String,String>{
      * f6 -> ( MethodDeclaration() )*
      * f7 -> "}"
      */
-
     public String visit(ClassExtendsDeclaration n, String argu) throws Exception {
         if (this.ClassMap.containsKey(n.f1.f0.toString())) {
             System.out.println("Class name '" + n.f1.f0.toString() + "' already exists");

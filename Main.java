@@ -21,6 +21,9 @@ class Main {
 			SymbolVisitor second = new SymbolVisitor(first.getClassMap());
 			root.accept(second, null);
 
+			TypeVisitor third = new TypeVisitor(first.getClassMap(), second.getSymboltable());
+			root.accept(third,null);
+
 			System.out.println("Checking ended successfully");
 		}
 		catch(ParseException ex){
