@@ -1,26 +1,10 @@
-class Test1 {
-    public static void main (String [] args){
-     int a;
+class Fac {
+    public int ComputeFac(int num){
+        int num_aux ;
+        if (num < 1)
+            num_aux = 1 ;
+        else
+            num_aux = num * (this.ComputeFac(num-1)) ;
+        return num_aux ;
     }
-}
-
-class Test2 {
-    boolean a;
-    public boolean m(int a, int b) {
-        return false;
-    }
-
-}
-
-class Test3 extends Test2{
-    boolean a;
-    public boolean m(int a, boolean b) {
-        boolean c;
-        boolean d;
-        return true;
-    }
-
-//    public boolean m(int a, int b) {
-//        return true;
-//    }
 }
