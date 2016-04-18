@@ -127,6 +127,7 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
                 }
             }
         }
+        // this.storedMethod = null;
 
         return null;
     }
@@ -183,7 +184,21 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
         Methods tempMethod = this.MethodsMap.get(this.storedMethod);
         Variables tempVar;
 
-//        if (this.storedClass != null)
+        // Begin with the innermost scope
+        if (this.storedClass != null) {
+
+            if (this.storedMethod != null && tempMethod.vars.containsKey(storedIdentifier)) {
+                return tempMethod.vars.get(storedIdentifier).getVarType();
+            }
+            else if (this.storedMethod != null && tempMethod.findArgs(storedIdentifier) != null) {
+                return tempMethod.findArgs(storedIdentifier);
+            }
+            else if (this.ClassMap.containsKey(this.storedIdentifier)) {
+                return this.storedIdentifier;
+            }
+            // else if (it is an inherited variable)
+        }
+
         return null;
     }
 }

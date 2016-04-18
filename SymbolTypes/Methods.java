@@ -19,4 +19,14 @@ public class Methods {
         }
         return false;
     }
+
+    public String findArgs(String argName) {
+        for (NamedVariables temp : args) {
+            if (temp.name.equals(argName)) {
+                return argName;
+            }
+        }
+
+        return null;
+    }
 }
