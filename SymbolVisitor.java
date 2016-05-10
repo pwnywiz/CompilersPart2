@@ -10,18 +10,30 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
 
     HashMap<String,Variables> VariablesMap;
     HashMap<String,Methods> MethodsMap;
+    HashMap<String,ArrayList<String>> VariablesSorted = new HashMap<String,ArrayList<String>>();
+    HashMap<String,ArrayList<String>> MethodsSorted = new HashMap<String,ArrayList<String>>();
     String inClass = null;
     String inMethod = null;
     ArrayList<NamedVariables> args;
+    ArrayList<String> varTemp;
+    ArrayList<String> methodTemp;
     Variables var;
     String storedClass;
+
+    public SymbolVisitor(HashMap<String,String> ClassMap) throws Exception{
+        this.ClassMap = ClassMap;
+    }
 
     public HashMap<String,SymbolTable> getSymboltable() {
         return symboltable;
     }
 
-    public SymbolVisitor(HashMap<String,String> ClassMap) throws Exception{
-        this.ClassMap = ClassMap;
+    public HashMap<String,ArrayList<String>> getVariablesSorted() {
+        return VariablesSorted;
+    }
+
+    public HashMap<String,ArrayList<String>> getMethodsSorted() {
+        return MethodsSorted;
     }
 
     /**
@@ -61,6 +73,8 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
         this.storedClass = n.f1.accept(this,null);
         VariablesMap = new HashMap<String,Variables>();
         MethodsMap = new HashMap<String,Methods>();
+        varTemp = new ArrayList<String>();
+        methodTemp = new ArrayList<String>();
         SymbolTable symbtable = new SymbolTable();
 
         inClass = "yes";
@@ -69,6 +83,8 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
         n.f4.accept(this,this.storedClass);
         symbtable.addMethods(MethodsMap);
         symboltable.put(this.storedClass,symbtable);
+        VariablesSorted.put(this.storedClass,varTemp);
+        MethodsSorted.put(this.storedClass,methodTemp);
         inClass = null;
 
         return null;
@@ -88,6 +104,8 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
         this.storedClass = n.f1.accept(this,null);
         VariablesMap = new HashMap<String,Variables>();
         MethodsMap = new HashMap<String,Methods>();
+        varTemp = new ArrayList<String>();
+        methodTemp = new ArrayList<String>();
         SymbolTable symbtable = new SymbolTable();
 
         inClass = "yes";
@@ -96,6 +114,8 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
         n.f6.accept(this,this.storedClass);
         symbtable.addMethods(MethodsMap);
         symboltable.put(this.storedClass,symbtable);
+        VariablesSorted.put(this.storedClass,varTemp);
+        MethodsSorted.put(this.storedClass,methodTemp);
         inClass = null;
 
         return null;
@@ -136,6 +156,7 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
             }
 
             VariablesMap.put(varName,var);
+            varTemp.add(varName);
         }
 
         return null;
@@ -217,6 +238,7 @@ public class SymbolVisitor extends GJDepthFirst<String,String> {
         temp.returnType = methodType;
         temp.args = args;
         MethodsMap.put(methodName,temp);
+        methodTemp.add(methodName);
         n.f7.accept(this,methodName);
         inMethod = null;
 

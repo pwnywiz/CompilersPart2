@@ -3,6 +3,7 @@ import visitor.GJDepthFirst;
 import SymbolTypes.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 public class TypeVisitor extends GJDepthFirst<String,String> {
     HashMap<String,String> ClassMap;
@@ -13,6 +14,7 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
     ArrayList<String> storedArgs = new ArrayList<String>();
     boolean addArgs = false;
     boolean inClass = false;
+    boolean enterIdentifier = true;
     String storedClass = null;
     String storedMethod = null;
     String storedIdentifier = null;
@@ -43,8 +45,7 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      * f17 -> "}"
      */
     public String visit(MainClass n, String argu) throws Exception {
-        // ToDo Edit it later
-//        this.storedClass = "Main Method";
+        this.storedClass = "Main Method";
         n.f15.accept(this,null);
         return null;
     }
@@ -63,7 +64,6 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
         this.MethodsMap = symboltable.get(this.storedClass).getMethodsMap();
         this.VariablesMap = symboltable.get(this.storedClass).getVariablesMap();
         n.f4.accept(this,storedClass);
-
         return null;
     }
 
@@ -144,7 +144,27 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      *       | Identifier()
      */
     public String visit(Type n, String argu) throws Exception {
-        return n.f0.accept(this,null);
+        enterIdentifier = false;
+        String check =  n.f0.accept(this,null);
+        enterIdentifier = true;
+
+        if (check.equals("boolean") || check.equals("int[]") || check.equals("int")) {
+            return check;
+        }
+
+//        String tempClass = storedClass;
+//        while (ClassMap.containsKey(tempClass)) {
+//            if (tempClass.equals(check)) {
+//                return check;
+//            }
+//            tempClass = ClassMap.get(tempClass);
+//        }
+        if (ClassMap.containsKey(check)) {
+            return check;
+        }
+
+        System.out.println("Unknown Class return type");
+        throw new Exception();
     }
 
     /**
@@ -175,29 +195,33 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      */
     public String visit(Identifier n, String argu) throws Exception {
         this.storedIdentifier = n.f0.toString();
-        Methods tempMethod = this.MethodsMap.get(this.storedMethod);
 
-//        if (inClass == false) {
-//
-//        }
 
+        if (enterIdentifier == false) {
+            return this.storedIdentifier;
+        }
+
+        if (storedClass.equals("Main Method")) {
+            return this.storedIdentifier;
+        }
         // Begin with the innermost scope and return the variable type
-        if (this.storedClass != null) {
+            Methods tempMethod = this.MethodsMap.get(this.storedMethod);
 
             if (this.storedMethod != null && tempMethod.vars.containsKey(this.storedIdentifier)) {
                 return tempMethod.vars.get(this.storedIdentifier).getVarType();
             }
             else if (this.storedMethod != null && tempMethod.findArgs(this.storedIdentifier) != null) {
-                return tempMethod.findArgs(this.storedIdentifier);
+                return tempMethod.findArgsType(this.storedIdentifier);
             }
             else if (this.VariablesMap.containsKey(this.storedIdentifier)) {
                 return this.VariablesMap.get(this.storedIdentifier).getVarType();
             }
             else {
                 String tempClass = storedClass;
+                HashMap<String,Variables> tempVars;
                 while (ClassMap.containsKey(tempClass)) {
                     tempClass = ClassMap.get(tempClass);
-                    HashMap<String,Variables> tempVars = symboltable.get(tempClass).getVariablesMap();
+                    tempVars = symboltable.get(tempClass).getVariablesMap();
                     if (tempVars.containsKey(this.storedIdentifier)) {
                         return tempVars.get(this.storedIdentifier).getVarType();
                     }
@@ -206,9 +230,7 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
 
             System.out.println("Variable with name '" + this.storedIdentifier + "' does not exist");
             throw new Exception();
-        }
 
-        return this.storedIdentifier;
     }
 
     /**
@@ -234,7 +256,6 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
         String leftType = n.f0.accept(this,null);
         String rightType = n.f2.accept(this,null);
 
-        // ToDo Possible cases with "this"
         if (!leftType.equals(rightType)) {
             if (leftType.equals("boolean") || rightType.equals("boolean") || leftType.equals("int[]") || rightType.equals("int[]") || leftType.equals("int") || rightType.equals("int")) {
                 System.out.print("Incorrect assignment of type '" + rightType + "' to type '" + leftType + "'");
@@ -273,7 +294,7 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
     public String visit(ArrayAssignmentStatement n, String argu) throws Exception {
         String arrayType = n.f0.accept(this,null);
         String leftType = n.f2.accept(this,null);
-        String rightType = n.f4.accept(this,null);
+        String rightType = n.f5.accept(this,null);
 
         if (!arrayType.equals("int[]") || leftType.equals("boolean") || rightType.equals("boolean") || (leftType.equals("int[]") && rightType.equals("int[]"))) {
             System.out.println("Incorrect assignment of type '" + rightType + "' to int array");
@@ -332,12 +353,10 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      */
     public String visit(PrintStatement n, String argu) throws Exception {
         String printExpr = n.f2.accept(this,null);
-
         if (!printExpr.equals("boolean") && !printExpr.equals("int")) {
             System.out.println("Incorrect output type from the print method");
             throw new Exception();
         }
-
         return null;
     }
 
@@ -354,9 +373,9 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      */
     public String visit(Expression n, String argu) throws Exception {
         String expr = n.f0.accept(this,null);
-        if (addArgs) {
-            storedArgs.add(expr);
-        }
+//        if (this.addArgs) {
+            this.storedArgs.add(expr);
+//        }
 
         return expr;
     }
@@ -370,7 +389,7 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
         String leftType = n.f0.accept(this,null);
         String rightType = n.f2.accept(this,null);
 
-        if (!leftType.equals("boolean") || !leftType.equals(rightType)) {
+        if (!leftType.equals("boolean") || !rightType.equals("boolean")) {
             System.out.println("Non boolean Logical Expression types");
             throw new Exception();
         }
@@ -493,7 +512,6 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      * f5 -> ")"
      */
     public String visit(MessageSend n, String argu) throws Exception {
-        // ToDo this.foo cases
         String callingClass = n.f0.accept(this,null);
         String methodName = n.f2.f0.toString();
 
@@ -528,13 +546,14 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
 
         methodArgs = tempMethod.args;
         this.storedArgs = new ArrayList<String>();
-        addArgs = true;
+        this.addArgs = true;
 
         n.f4.accept(this,"yes");
 
         exprArgs = this.storedArgs;
         if (exprArgs.size() != methodArgs.size()) {
             System.out.println("Different amount of arguments between the same method call with name '" + methodName + "'");
+            throw new Exception();
         }
         for (int i = 0; i < exprArgs.size(); i++) {
             if (!methodArgs.get(i).vars.getVarType().equals(exprArgs.get(i))) {
@@ -554,7 +573,7 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
                 }
             }
         }
-        addArgs = false;
+        this.addArgs = false;
 
         return tempMethod.returnType;
     }
@@ -588,9 +607,9 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      *       | AllocationExpression()
      *       | BracketExpression()
      */
-    public String visit(PrimaryExpression n, String argu) throws Exception {
-        return n.f0.accept(this,null);
-    }
+//    public String visit(PrimaryExpression n, String argu) throws Exception {
+//        return n.f0.accept(this,null);
+//    }
 
     /**
      * f0 -> <INTEGER_LITERAL>
@@ -638,7 +657,17 @@ public class TypeVisitor extends GJDepthFirst<String,String> {
      * f3 -> ")"
      */
     public String visit(AllocationExpression n, String argu) throws Exception {
-        return n.f1.accept(this,null);
+        enterIdentifier = false;
+        n.f1.accept(this,null);
+        enterIdentifier = true;
+
+        String idcheck = n.f1.f0.toString();
+        if (!this.ClassMap.containsKey(idcheck)) {
+            System.out.println("Incorrect Allocation Type");
+            throw new Exception();
+        }
+
+        return idcheck;
     }
 
     /**

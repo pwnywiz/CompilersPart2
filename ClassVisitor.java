@@ -47,7 +47,7 @@ public class ClassVisitor extends GJDepthFirst<String,String>{
             throw new Exception();
         }
         MainVisited = true;
-        this.ClassMap.put(n.f1.f0.toString(),null);
+        this.ClassMap.put(n.f1.f0.toString(),"-main-");
 
         return null;
     }

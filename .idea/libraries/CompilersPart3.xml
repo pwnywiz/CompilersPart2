@@ -1,8 +1,8 @@
 <component name="libraryTable">
-  <library name="CompilersPart2">
+  <library name="CompilersPart3">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/javacc5.jar!/" />
       <root url="jar://$PROJECT_DIR$/jtb132di.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javacc5.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -29,4 +29,14 @@ public class Methods {
 
         return null;
     }
+
+    public String findArgsType(String argName) {
+        for (NamedVariables temp : args) {
+            if (temp.name.equals(argName)) {
+                return temp.vars.getVarType();
+            }
+        }
+
+        return null;
+    }
 }
