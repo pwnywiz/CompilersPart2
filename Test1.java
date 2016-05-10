@@ -26,11 +26,11 @@ class B extends A {
         return 1;
     }
 
-    public int boo() {
+    public int boo(int a, int b, int c, int d) {
         return 1;
     }
 
-    public int coo() {
+    public int coo(int a, int b, int c) {
         return 1;
     }
 }
@@ -39,11 +39,11 @@ class C extends B {
     int i;
     int j;
 
-    public int foor() {
+    public int foor(int a, int b) {
         return 1;
     }
 
-    public int boo() {
+    public int boo(int a, int b, int c, int d) {
         return 1;
     }
 }
