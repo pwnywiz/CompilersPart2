@@ -75,22 +75,13 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
             }
         }
 
+        n.f14.accept(this,null);
+        n.f15.accept(this,null);
+
         this.spCode += "END\n";
-
         System.out.println(this.spCode);
-        return null;
-    }
-
-    /**
-     * f0 -> "class"
-     * f1 -> Identifier()
-     * f2 -> "{"
-     * f3 -> ( VarDeclaration() )*
-     * f4 -> ( MethodDeclaration() )*
-     * f5 -> "}"
-     */
-    public String visit(ClassDeclaration n, String argu) throws Exception {
 
         return null;
     }
+
 }
