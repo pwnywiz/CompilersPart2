@@ -29,7 +29,7 @@ public class TempCounter {
         }
 
         System.out.println("Max method arguments = " + maxArgs);
-        counter = maxArgs + 1;
+        counter = maxArgs;
     }
 
     public int getTemp() {

@@ -14,6 +14,8 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     HashMap<String,ArrayList<String>> vVariables;
     HashMap<String,ArrayList<String>> vMethods;
 
+    String spCode = "";
+    String storedClass = null;
     TempCounter tempcounter;
 
     public CodeGeneration(HashMap<String,String> ClassMap, HashMap<String, SymbolTable> Symboltable,
@@ -23,6 +25,10 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         this.Symboltable = Symboltable;
         this.vVariables = vVariables;
         this.vMethods = vMethods;
+    }
+
+    public String getSpCode() {
+        return this.spCode;
     }
 
     /**
@@ -48,6 +54,30 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     public String visit(MainClass n, String argu) throws Exception {
         tempcounter = new TempCounter(this.Symboltable);
         tempcounter.maxArgs();
+        this.storedClass = "Main Method";
+
+        this.spCode += "MAIN\n";
+
+        for (String key : vMethods.keySet()) {
+            System.out.println(key);
+            int labeltemp = tempcounter.getTemp();
+            int labelallocate = tempcounter.getTemp();
+            this.spCode += "MOVE TEMP " + labeltemp + " " + key + "_vTable\n";
+            this.spCode += "MOVE TEMP " + labelallocate + " HALLOCATE " + 4*vMethods.get(key).size() + "\n";
+            this.spCode += "HSTORE TEMP " + labeltemp + " 0 TEMP " + labelallocate + "\n";
+
+            int offset = 0;
+            for (String vmethod : vMethods.get(key)) {
+                int methodtemp = tempcounter.getTemp();
+                this.spCode += "MOVE TEMP " + methodtemp + " " + vmethod + "\n";
+                this.spCode += "HSTORE TEMP " + labelallocate + " " + offset + " TEMP " + methodtemp + "\n";
+                offset += 4;
+            }
+        }
+
+        this.spCode += "END\n";
+
+        System.out.println(this.spCode);
         return null;
     }
 
@@ -60,7 +90,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f5 -> "}"
      */
     public String visit(ClassDeclaration n, String argu) throws Exception {
-        int a = tempcounter.getTemp();
+
         return null;
     }
 }
