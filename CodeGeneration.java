@@ -84,4 +84,17 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         return null;
     }
 
+    /**
+     * f0 -> "class"
+     * f1 -> Identifier()
+     * f2 -> "{"
+     * f3 -> ( VarDeclaration() )*
+     * f4 -> ( MethodDeclaration() )*
+     * f5 -> "}"
+     */
+    public String visit(ClassDeclaration n, A argu) throws Exception {
+
+        return null;
+    }
+
 }
