@@ -93,7 +93,6 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f5 -> "}"
      */
     public String visit(ClassDeclaration n, A argu) throws Exception {
-
         return null;
     }
 
