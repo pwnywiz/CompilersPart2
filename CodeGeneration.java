@@ -83,7 +83,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         n.f15.accept(this,null);
 
         this.spCode += "END\n";
-        System.out.println(this.spCode);
+        this.spCode += "\n";
 
         return null;
     }
@@ -96,7 +96,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f4 -> ( MethodDeclaration() )*
      * f5 -> "}"
      */
-    public String visit(ClassDeclaration n, A argu) throws Exception {
+    public String visit(ClassDeclaration n, String argu) throws Exception {
         this.storedClass = n.f1.f0.toString();
         n.f4.accept(this,storedClass);
 
@@ -125,7 +125,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f1 -> Identifier()
      * f2 -> ";"
      */
-    public String visit(VarDeclaration n, A argu) throws Exception {
+    public String visit(VarDeclaration n, String argu) throws Exception {
         // ToDo Maybe Edit later depending on the needs
         tempVariables.put(n.f1.f0.toString(),tempcounter.getTemp());
 
@@ -167,6 +167,70 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         this.spCode += "\t" + retValue + "\n";
         this.spCode += "END\n";
 
+        return null;
+    }
+
+    /**
+     * f0 -> "int"
+     * f1 -> "["
+     * f2 -> "]"
+     */
+    public String visit(ArrayType n, String argu) throws Exception {
+        return "int[]";
+    }
+
+    /**
+     * f0 -> "boolean"
+     */
+    public String visit(BooleanType n, String argu) throws Exception {
+        return "boolean";
+    }
+
+    /**
+     * f0 -> "int"
+     */
+    public String visit(IntegerType n, String argu) throws Exception {
+        return "int";
+    }
+
+    /**
+     * f0 -> Identifier()
+     * f1 -> "="
+     * f2 -> Expression()
+     * f3 -> ";"
+     */
+    public String visit(AssignmentStatement n, String argu) throws Exception {
+        // ToDo Edit Later
+
+        return null;
+    }
+
+    /**
+     * f0 -> Identifier()
+     * f1 -> "["
+     * f2 -> Expression()
+     * f3 -> "]"
+     * f4 -> "="
+     * f5 -> Expression()
+     * f6 -> ";"
+     */
+    public String visit(ArrayAssignmentStatement n, String argu) throws Exception {
+        // ToDo Edit Later
+
+        return null;
+    }
+
+    /**
+     * f0 -> "if"
+     * f1 -> "("
+     * f2 -> Expression()
+     * f3 -> ")"
+     * f4 -> Statement()
+     * f5 -> "else"
+     * f6 -> Statement()
+     */
+    public String visit(IfStatement n, String argu) throws Exception {
+        String ifExpr = n.f2.accept(this,null);
         return null;
     }
 }

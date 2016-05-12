@@ -31,6 +31,8 @@ class Main {
 				CodeGeneration code = new CodeGeneration(first.getClassMap(), second.getSymboltable(), vTable.getvVariables(), vTable.getvMethods());
 				root.accept(code, null);
 
+				System.out.println(code.getSpCode());
+
 //				TypeVisitor third = new TypeVisitor(first.getClassMap(), second.getSymboltable());
 //				root.accept(third, null);
 
