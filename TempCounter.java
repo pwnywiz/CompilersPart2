@@ -8,6 +8,7 @@ public class TempCounter {
     HashMap<String, SymbolTable> Symboltable;
 
     int counter = 0;
+    int argcounter = 0;
 
     public TempCounter(HashMap<String, SymbolTable> Symboltable) {
         this.Symboltable = Symboltable;
@@ -36,5 +37,19 @@ public class TempCounter {
         counter++;
 
         return counter;
+    }
+
+    public int getArgTemp() {
+        argcounter++;
+
+        return argcounter;
+    }
+
+    public void resetCounter() {
+        counter = 0;
+    }
+
+    public void resetArgCounter() {
+        argcounter = 0;
     }
 }

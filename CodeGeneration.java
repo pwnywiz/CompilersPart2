@@ -1,8 +1,8 @@
 import SymbolTypes.Methods;
+import SymbolTypes.NamedVariables;
 import SymbolTypes.SymbolTable;
 import SymbolTypes.Variables;
-import syntaxtree.ClassDeclaration;
-import syntaxtree.MainClass;
+import syntaxtree.*;
 import visitor.GJDepthFirst;
 
 import java.util.ArrayList;
@@ -14,8 +14,12 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     HashMap<String,ArrayList<String>> vVariables;
     HashMap<String,ArrayList<String>> vMethods;
 
+    HashMap<String,Integer> tempVariables = new HashMap<String,Integer>();
+
     String spCode = "";
     String storedClass = null;
+    String storedMethod = null;
+
     TempCounter tempcounter;
 
     public CodeGeneration(HashMap<String,String> ClassMap, HashMap<String, SymbolTable> Symboltable,
@@ -93,7 +97,76 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f5 -> "}"
      */
     public String visit(ClassDeclaration n, A argu) throws Exception {
+        this.storedClass = n.f1.f0.toString();
+        n.f4.accept(this,storedClass);
+
         return null;
     }
 
+    /**
+     * f0 -> "class"
+     * f1 -> Identifier()
+     * f2 -> "extends"
+     * f3 -> Identifier()
+     * f4 -> "{"
+     * f5 -> ( VarDeclaration() )*
+     * f6 -> ( MethodDeclaration() )*
+     * f7 -> "}"
+     */
+    public String visit(ClassExtendsDeclaration n, String argu) throws Exception {
+        this.storedClass = n.f1.f0.toString();
+        n.f6.accept(this,storedClass);
+
+        return null;
+    }
+
+    /**
+     * f0 -> Type()
+     * f1 -> Identifier()
+     * f2 -> ";"
+     */
+    public String visit(VarDeclaration n, A argu) throws Exception {
+        // ToDo Maybe Edit later depending on the needs
+        tempVariables.put(n.f1.f0.toString(),tempcounter.getTemp());
+
+        return null;
+    }
+
+    /**
+     * f0 -> "public"
+     * f1 -> Type()
+     * f2 -> Identifier()
+     * f3 -> "("
+     * f4 -> ( FormalParameterList() )?
+     * f5 -> ")"
+     * f6 -> "{"
+     * f7 -> ( VarDeclaration() )*
+     * f8 -> ( Statement() )*
+     * f9 -> "return"
+     * f10 -> Expression()
+     * f11 -> ";"
+     * f12 -> "}"
+     */
+    public String visit(MethodDeclaration n, String storedName) throws Exception {
+        this.storedMethod = n.f2.f0.toString();
+        tempcounter.resetArgCounter();
+        tempVariables.clear();
+
+        tempVariables.put("this", 0);
+        ArrayList<NamedVariables> methodArgs = Symboltable.get(this.storedClass).getMethodsMap().get(this.storedMethod).args;
+        for (NamedVariables namedVar : methodArgs) {
+                tempVariables.put(namedVar.name,tempcounter.getArgTemp());
+        }
+        this.spCode += this.storedClass + "_" + this.storedMethod + " [" + methodArgs.size() + "]\n";
+        n.f7.accept(this,null);
+
+        this.spCode += "BEGIN\n";
+        n.f8.accept(this,null);
+        String retValue = n.f10.accept(this,null);
+        this.spCode += "RETURN\n";
+        this.spCode += "\t" + retValue + "\n";
+        this.spCode += "END\n";
+
+        return null;
+    }
 }
