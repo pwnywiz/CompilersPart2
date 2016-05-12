@@ -230,7 +230,20 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f6 -> Statement()
      */
     public String visit(IfStatement n, String argu) throws Exception {
+        int jumplabel1;
+        int jumplabel2;
+
         String ifExpr = n.f2.accept(this,null);
+        jumplabel1 = tempcounter.getLabelTemp();
+
+        this.spCode += "CJUMP " + ifExpr + " L" + jumplabel1 + "\n";
+        n.f4.accept(this,null);
+        jumplabel2 = tempcounter.getLabelTemp();
+        this.spCode += "JUMP L" + jumplabel2 + "\n";
+        this.spCode += "L" + jumplabel1 + " NOOP\n";
+        n.f6.accept(this,null);
+        this.spCode += "L" + jumplabel2 + " NOOP\n";
+
         return null;
     }
 }
