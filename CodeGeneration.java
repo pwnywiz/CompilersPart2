@@ -246,4 +246,76 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
 
         return null;
     }
+
+    /**
+     * f0 -> "while"
+     * f1 -> "("
+     * f2 -> Expression()
+     * f3 -> ")"
+     * f4 -> Statement()
+     */
+    public String visit(WhileStatement n, String argu) throws Exception {
+        int jumplabel1;
+        int jumplabel2;
+
+        jumplabel1 = tempcounter.getLabelTemp();
+        this.spCode += "L" + jumplabel1 + " NOOP\n";
+        String whileExpr = n.f2.accept(this,null);
+        jumplabel2 = tempcounter.getLabelTemp();
+        this.spCode += "CJUMP " + whileExpr + " L" + jumplabel2 + "\n";
+        n.f4.accept(this,null);
+        this.spCode += "JUMP L" + jumplabel1 + "\n";
+        this.spCode += "L" + jumplabel2 + " NOOP\n";
+
+        return null;
+    }
+
+    /**
+     * f0 -> "System.out.println"
+     * f1 -> "("
+     * f2 -> Expression()
+     * f3 -> ")"
+     * f4 -> ";"
+     */
+    public String visit(PrintStatement n, String argu) throws Exception {
+        String printExpr = n.f2.accept(this,null);
+
+        this.spCode += "PRINT " + printExpr + "\n";
+
+        return null;
+    }
+
+    /**
+     * f0 -> AndExpression()
+     *       | CompareExpression()
+     *       | PlusExpression()
+     *       | MinusExpression()
+     *       | TimesExpression()
+     *       | ArrayLookup()
+     *       | ArrayLength()
+     *       | MessageSend()
+     *       | Clause()
+     */
+    public String visit(Expression n, String argu) throws Exception {
+        // ToDo Maybe edit it if needed
+
+        return null;
+    }
+
+    /**
+     * f0 -> Clause()
+     * f1 -> "&&"
+     * f2 -> Clause()
+     */
+    public String visit(AndExpression n, String argu) throws Exception {
+        String leftType = n.f0.accept(this,null);
+        String rightType = n.f2.accept(this,null);
+
+        if (!leftType.equals("boolean") || !rightType.equals("boolean")) {
+            System.out.println("Non boolean Logical Expression types");
+            throw new Exception();
+        }
+
+        return "boolean";
+    }
 }
