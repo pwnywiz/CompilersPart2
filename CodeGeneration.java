@@ -19,6 +19,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     String spCode = "";
     boolean thisObject = false;
     String storedClass = null;
+    String actualObject = null;
     String storedMethod = null;
 
     TempCounter tempcounter;
@@ -333,14 +334,14 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
 
         String leftExpr;
         String rightExpr;
-        int jumptemp1;
+        int labeltemp1;
 
         leftExpr = n.f0.accept(this,null);
         rightExpr = n.f2.accept(this,null);
-        jumptemp1 = tempcounter.getTemp();
-        this.spCode += "MOVE TEMP " + jumptemp1 + " LT " + leftExpr + " " + rightExpr + "\n";
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp1 + " LT " + leftExpr + " " + rightExpr + "\n";
 
-        return "TEMP " + jumptemp1;
+        return "TEMP " + labeltemp1;
     }
 
     /**
@@ -351,14 +352,14 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     public String visit(PlusExpression n, String argu) throws Exception {
         String leftExpr;
         String rightExpr;
-        int jumptemp1;
+        int labeltemp1;
 
         leftExpr = n.f0.accept(this,null);
         rightExpr = n.f0.accept(this,null);
-        jumptemp1 = tempcounter.getTemp();
-        this.spCode += "MOVE TEMP " + jumptemp1 + " PLUS " + leftExpr + " " + rightExpr + "\n";
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp1 + " PLUS " + leftExpr + " " + rightExpr + "\n";
 
-        return "TEMP " + jumptemp1;
+        return "TEMP " + labeltemp1;
     }
 
     /**
@@ -369,14 +370,14 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     public String visit(MinusExpression n, String argu) throws Exception {
         String leftExpr;
         String rightExpr;
-        int jumptemp1;
+        int labeltemp1;
 
         leftExpr = n.f0.accept(this,null);
         rightExpr = n.f0.accept(this,null);
-        jumptemp1 = tempcounter.getTemp();
-        this.spCode += "MOVE TEMP " + jumptemp1 + " MINUS " + leftExpr + " " + rightExpr + "\n";
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp1 + " MINUS " + leftExpr + " " + rightExpr + "\n";
 
-        return "TEMP " + jumptemp1;
+        return "TEMP " + labeltemp1;
     }
 
     /**
@@ -387,14 +388,14 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     public String visit(TimesExpression n, String argu) throws Exception {
         String leftExpr;
         String rightExpr;
-        int jumptemp1;
+        int labeltemp1;
 
         leftExpr = n.f0.accept(this,null);
         rightExpr = n.f0.accept(this,null);
-        jumptemp1 = tempcounter.getTemp();
-        this.spCode += "MOVE TEMP " + jumptemp1 + " TIMES " + leftExpr + " " + rightExpr + "\n";
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp1 + " TIMES " + leftExpr + " " + rightExpr + "\n";
 
-        return "TEMP " + jumptemp1;
+        return "TEMP " + labeltemp1;
     }
 
     /**
@@ -450,4 +451,45 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         return temps.get(counter - 6);
     }
 
+    /**
+     * f0 -> PrimaryExpression()
+     * f1 -> "."
+     * f2 -> "length"
+     */
+    public String visit(ArrayLength n, String argu) throws Exception {
+        String arrayExpr;
+        int labeltemp1;
+
+        arrayExpr = n.f0.accept(this,null);
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "HLOAD TEMP " + labeltemp1 + " " + arrayExpr + " 0\n";
+
+        return "TEMP " + labeltemp1;
+    }
+
+    /**
+     * f0 -> PrimaryExpression()
+     * f1 -> "."
+     * f2 -> Identifier()
+     * f3 -> "("
+     * f4 -> ( ExpressionList() )?
+     * f5 -> ")"
+     */
+    public String visit(MessageSend n, String argu) throws Exception {
+        String callingClass = n.f0.accept(this,null);
+        String methodName = n.f2.f0.toString();
+
+        String actualClass;
+
+        if (this.thisObject) {
+            actualClass = this.storedClass;
+        }
+        else {
+            // ToDo Edit every PrimaryExpression to add the class name at actualObject
+            actualClass = this.actualObject;
+        }
+
+        this.thisObject = false;
+        return null;
+    }
 }
