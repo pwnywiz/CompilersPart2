@@ -17,6 +17,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     HashMap<String,Integer> tempVariables = new HashMap<String,Integer>();
 
     String spCode = "";
+    boolean thisObject = false;
     String storedClass = null;
     String storedMethod = null;
 
@@ -308,14 +309,145 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f2 -> Clause()
      */
     public String visit(AndExpression n, String argu) throws Exception {
-        String leftType = n.f0.accept(this,null);
-        String rightType = n.f2.accept(this,null);
+        String leftExpr;
+        String rightExpr;
+        int jumplabel1;
 
-        if (!leftType.equals("boolean") || !rightType.equals("boolean")) {
-            System.out.println("Non boolean Logical Expression types");
-            throw new Exception();
-        }
+        leftExpr = n.f0.accept(this,null);
+        jumplabel1 = tempcounter.getLabelTemp();
+        this.spCode += "CJUMP " + leftExpr + " L" + jumplabel1 + "\n";
+        rightExpr = n.f2.accept(this,null);
+        this.spCode += "MOVE " + leftExpr + " " + rightExpr + "\n";
+        this.spCode += "L" + jumplabel1 + " NOOP\n";
 
-        return "boolean";
+        return leftExpr;
     }
+
+    /**
+     * f0 -> PrimaryExpression()
+     * f1 -> "<"
+     * f2 -> PrimaryExpression()
+     */
+    public String visit(CompareExpression n, String argu) throws Exception {
+        // ToDo Maybe add MOVE TEMP if not stored already
+
+        String leftExpr;
+        String rightExpr;
+        int jumptemp1;
+
+        leftExpr = n.f0.accept(this,null);
+        rightExpr = n.f2.accept(this,null);
+        jumptemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + jumptemp1 + " LT " + leftExpr + " " + rightExpr + "\n";
+
+        return "TEMP " + jumptemp1;
+    }
+
+    /**
+     * f0 -> PrimaryExpression()
+     * f1 -> "+"
+     * f2 -> PrimaryExpression()
+     */
+    public String visit(PlusExpression n, String argu) throws Exception {
+        String leftExpr;
+        String rightExpr;
+        int jumptemp1;
+
+        leftExpr = n.f0.accept(this,null);
+        rightExpr = n.f0.accept(this,null);
+        jumptemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + jumptemp1 + " PLUS " + leftExpr + " " + rightExpr + "\n";
+
+        return "TEMP " + jumptemp1;
+    }
+
+    /**
+     * f0 -> PrimaryExpression()
+     * f1 -> "-"
+     * f2 -> PrimaryExpression()
+     */
+    public String visit(MinusExpression n, String argu) throws Exception {
+        String leftExpr;
+        String rightExpr;
+        int jumptemp1;
+
+        leftExpr = n.f0.accept(this,null);
+        rightExpr = n.f0.accept(this,null);
+        jumptemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + jumptemp1 + " MINUS " + leftExpr + " " + rightExpr + "\n";
+
+        return "TEMP " + jumptemp1;
+    }
+
+    /**
+     * f0 -> PrimaryExpression()
+     * f1 -> "*"
+     * f2 -> PrimaryExpression()
+     */
+    public String visit(TimesExpression n, String argu) throws Exception {
+        String leftExpr;
+        String rightExpr;
+        int jumptemp1;
+
+        leftExpr = n.f0.accept(this,null);
+        rightExpr = n.f0.accept(this,null);
+        jumptemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + jumptemp1 + " TIMES " + leftExpr + " " + rightExpr + "\n";
+
+        return "TEMP " + jumptemp1;
+    }
+
+    /**
+     * f0 -> PrimaryExpression()
+     * f1 -> "["
+     * f2 -> PrimaryExpression()
+     * f3 -> "]"
+     */
+    public String visit(ArrayLookup n, String argu) throws Exception {
+        String idtypeExpr;
+        String arrayExpr;
+        int jumplabel1;
+        int jumplabel2;
+        int counter = 0;
+        HashMap<Integer,String> temps = new HashMap<Integer,String>();
+
+        idtypeExpr = n.f0.accept(this,null);
+        arrayExpr = n.f2.accept(this,null);
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "MOVE " + temps.get(counter) + " LT " + arrayExpr + " 0\n";
+        jumplabel1 = tempcounter.getLabelTemp();
+        this.spCode += "CJUMP " + temps.get(counter) + " L" + jumplabel1 + "\n";
+        this.spCode += "ERROR\n";
+        this.spCode += "L" + jumplabel1 + " NOOP\n";
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "HLOAD " + temps.get(counter) + " " + idtypeExpr + " 0\n";
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "MOVE " + temps.get(counter) + " 1\n";
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "MOVE " + temps.get(counter) + " LT " + arrayExpr + " " + temps.get(counter - 2) + "\n";
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "MOVE " + temps.get(counter) + " MINUS " + temps.get(counter - 2) + " " + temps.get(counter -1 ) + "\n";
+        jumplabel2 = tempcounter.getLabelTemp();
+        this.spCode += "CJUMP " + temps.get(counter) + " L" + jumplabel2 + "\n";
+        this.spCode += "ERROR\n";
+        this.spCode += "L" + jumplabel2 + " NOOP\n";
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "MOVE " + temps.get(counter) + " TIMES " + arrayExpr + " 4\n";
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "MOVE " + temps.get(counter) + " PLUS " + temps.get(counter - 1) + " 4\n";
+        counter++;
+        temps.put(counter,"TEMP " + tempcounter.getTemp());
+        this.spCode += "MOVE " + temps.get(counter) + " PLUS " + idtypeExpr + " " + temps.get(counter - 1) + "\n";
+        this.spCode += "HLOAD " + temps.get(counter - 6) + " " + temps.get(counter) + " 0\n";
+
+        return temps.get(counter - 6);
+    }
+
 }
