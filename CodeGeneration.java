@@ -85,8 +85,11 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
             }
         }
 
+        System.out.println("AAAA");
         n.f14.accept(this,null);
+        System.out.println("BBBB");
         n.f15.accept(this,null);
+        System.out.println("CCCC");
 
         this.spCode += "END\n";
         this.spCode += "\n";
