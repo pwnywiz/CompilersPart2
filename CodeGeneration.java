@@ -15,6 +15,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     HashMap<String,ArrayList<String>> vMethods;
 
     HashMap<String,Integer> tempVariables = new HashMap<String,Integer>();
+    ArrayList<String> exprArgs = new ArrayList<String>();
 
     String spCode = "";
     boolean thisObject = false;
@@ -478,8 +479,14 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     public String visit(MessageSend n, String argu) throws Exception {
         String callingClass = n.f0.accept(this,null);
         String methodName = n.f2.f0.toString();
+        exprArgs.clear();
 
+        ArrayList<String> methodFind;
         String actualClass;
+        int labeltemp1;
+        int labeltemp2;
+        int labeltemp3;
+        int methodOffset = 0;
 
         if (this.thisObject) {
             actualClass = this.storedClass;
@@ -489,7 +496,106 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
             actualClass = this.actualObject;
         }
 
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "HLOAD TEMP " + labeltemp1 + " " + callingClass + " 0\n";
+
+        methodFind = vMethods.get(actualClass);
+        for (String tempmethod : methodFind) {
+            if (tempmethod.contains(methodName)) {
+                break;
+            }
+            methodOffset++;
+        }
+
+        labeltemp2 = tempcounter.getTemp();
+        this.spCode += "HLOAD TEMP " + labeltemp2 + " TEMP " + labeltemp1 + " " + methodOffset*4 + "\n";
+
+        n.f4.accept(this,null);
+
+        labeltemp3 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp3 + " TEMP " + labeltemp2 + "( " + callingClass + " ";
+        for (String tempArg : exprArgs) {
+            this.spCode += tempArg + " ";
+        }
+        this.spCode += ")\n";
+
         this.thisObject = false;
+
+        return "TEMP " + labeltemp3;
+    }
+
+    /**
+     * f0 -> Expression()
+     * f1 -> ExpressionTail()
+     */
+    public String visit(ExpressionList n, String argu) throws Exception {
+        String expr = n.f0.accept(this,null);
+        this.exprArgs.add(expr);
+        n.f1.accept(this,null);
+
+        return expr;
+    }
+
+    /**
+     * f0 -> ","
+     * f1 -> Expression()
+     */
+    public String visit(ExpressionTerm n, String argu) throws Exception {
+        String expr = n.f1.accept(this,null);
+        this.exprArgs.add(expr);
+
+        return expr;
+    }
+
+    /**
+     * f0 -> <INTEGER_LITERAL>
+     */
+    public String visit(IntegerLiteral n, String argu) throws Exception {
+        int labeltemp1;
+
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp1 + " " + n.f0.toString() + "\n";
+
+        return "TEMP " + labeltemp1;
+    }
+
+    /**
+     * f0 -> "true"
+     */
+    public String visit(TrueLiteral n, String argu) throws Exception {
+        int labeltemp1;
+
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp1 + " 1\n";
+
+        return "TEMP " + labeltemp1;
+    }
+
+    /**
+     * f0 -> "false"
+     */
+    public String visit(FalseLiteral n, String argu) throws Exception {
+        int labeltemp1;
+
+        labeltemp1 = tempcounter.getTemp();
+        this.spCode += "MOVE TEMP " + labeltemp1 + " 0\n";
+
+        return "TEMP " + labeltemp1;
+    }
+
+    /**
+     * f0 -> <IDENTIFIER>
+     */
+    public String visit(Identifier n, String argu) throws Exception {
         return null;
+    }
+
+    /**
+     * f0 -> "this"
+     */
+    public String visit(ThisExpression n, String argu) throws Exception {
+        this.thisObject = true;
+
+        return "TEMP 0";
     }
 }
