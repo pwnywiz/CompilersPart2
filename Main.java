@@ -33,6 +33,10 @@ class Main {
 
 				System.out.println(code.getSpCode());
 
+				PrintWriter file = new PrintWriter("spiglet_code.txt", "UTF-8");
+				file.println(code.getSpCode());
+				file.close();
+
 //				TypeVisitor third = new TypeVisitor(first.getClassMap(), second.getSymboltable());
 //				root.accept(third, null);
 

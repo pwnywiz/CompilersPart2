@@ -32,7 +32,7 @@ public class vCreate {
         Set<String> classes = ClassMap.keySet();
 
         for (String temp : classes) {
-            if (ClassMap.get(temp).equals("-main-")) {
+            if (ClassMap.get(temp) != null && ClassMap.get(temp).equals("-main-")) {
                 classes.remove(temp);
                 break;
             }

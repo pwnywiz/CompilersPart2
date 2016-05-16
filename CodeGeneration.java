@@ -85,7 +85,6 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
             }
         }
 
-        System.out.println("AAAA");
         n.f14.accept(this,null);
         System.out.println("BBBB");
         n.f15.accept(this,null);
@@ -107,7 +106,9 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      */
     public String visit(ClassDeclaration n, String argu) throws Exception {
         this.storedClass = n.f1.f0.toString();
+        System.out.println("FFFF");
         n.f4.accept(this,storedClass);
+        System.out.println("AAAA");
 
         return null;
     }
@@ -163,9 +164,10 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         tempVariables.put("this", 0);
         ArrayList<NamedVariables> methodArgs = Symboltable.get(this.storedClass).getMethodsMap().get(this.storedMethod).args;
         for (NamedVariables namedVar : methodArgs) {
-                tempVariables.put(namedVar.name,tempcounter.getArgTemp());
+            System.out.println("BBBB = " + namedVar.name);
+            tempVariables.put(namedVar.name,tempcounter.getArgTemp());
         }
-        this.spCode += this.storedClass + "_" + this.storedMethod + " [" + methodArgs.size() + "]\n";
+        this.spCode += this.storedClass + "_" + this.storedMethod + " [" + (methodArgs.size()+1) + "]\n";
         n.f7.accept(this,null);
 
         this.spCode += "BEGIN\n";
@@ -222,6 +224,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
             this.spCode += " " + rightExpr + "\n";
         }
         else {
+            System.out.println("AAAAAAAAAAAA");
             this.spCode += "MOVE " + leftIdentifier + " " + rightExpr + "\n";
         }
 
@@ -308,8 +311,9 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
 
         copyVal = true;
         String ifExpr = n.f2.accept(this,null);
+        copyVal = false;
         jumplabel1 = tempcounter.getLabelTemp();
-
+        System.out.println("AAAA");
         this.spCode += "CJUMP " + ifExpr + " L" + jumplabel1 + "\n";
         n.f4.accept(this,null);
         jumplabel2 = tempcounter.getLabelTemp();
@@ -318,7 +322,6 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         n.f6.accept(this,null);
         this.spCode += "L" + jumplabel2 + " NOOP\n";
 
-        copyVal = false;
         return null;
     }
 
@@ -413,6 +416,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         String rightExpr;
         int labeltemp1;
 
+        System.out.println("AAAA");
         leftExpr = n.f0.accept(this,null);
         rightExpr = n.f2.accept(this,null);
         labeltemp1 = tempcounter.getTemp();
@@ -432,7 +436,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         int labeltemp1;
 
         leftExpr = n.f0.accept(this,null);
-        rightExpr = n.f0.accept(this,null);
+        rightExpr = n.f2.accept(this,null);
         labeltemp1 = tempcounter.getTemp();
         this.spCode += "MOVE TEMP " + labeltemp1 + " PLUS " + leftExpr + " " + rightExpr + "\n";
 
@@ -450,7 +454,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         int labeltemp1;
 
         leftExpr = n.f0.accept(this,null);
-        rightExpr = n.f0.accept(this,null);
+        rightExpr = n.f2.accept(this,null);
         labeltemp1 = tempcounter.getTemp();
         this.spCode += "MOVE TEMP " + labeltemp1 + " MINUS " + leftExpr + " " + rightExpr + "\n";
 
@@ -468,7 +472,8 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         int labeltemp1;
 
         leftExpr = n.f0.accept(this,null);
-        rightExpr = n.f0.accept(this,null);
+        rightExpr = n.f2.accept(this,null);
+        System.out.println("AAAA rightExpr = " + rightExpr);
         labeltemp1 = tempcounter.getTemp();
         this.spCode += "MOVE TEMP " + labeltemp1 + " TIMES " + leftExpr + " " + rightExpr + "\n";
 
@@ -560,6 +565,8 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
     public String visit(MessageSend n, String argu) throws Exception {
         copyVal = true;
         String callingClass = n.f0.accept(this,null);
+        System.out.println("ZZZZ");
+
         String methodName = n.f2.f0.toString();
         exprArgs.clear();
 
@@ -571,6 +578,8 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         int methodOffset = 0;
 
         if (this.thisObject) {
+            System.out.println("AAAAAAAAAAAAAAAAAAAA");
+
             actualClass = this.storedClass;
         }
         else {
@@ -584,6 +593,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         methodFind = vMethods.get(actualClass);
         for (String tempmethod : methodFind) {
             if (tempmethod.contains(methodName)) {
+                System.out.println("AAAA = " + methodName);
                 break;
             }
             methodOffset++;
@@ -592,18 +602,21 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         labeltemp2 = tempcounter.getTemp();
         this.spCode += "HLOAD TEMP " + labeltemp2 + " TEMP " + labeltemp1 + " " + methodOffset*4 + "\n";
 
+        System.out.println("AABB");
+
         copyVal = true;
         n.f4.accept(this,null);
 
         labeltemp3 = tempcounter.getTemp();
-        this.spCode += "MOVE TEMP " + labeltemp3 + " TEMP " + labeltemp2 + "( " + callingClass + " ";
+        this.spCode += "MOVE TEMP " + labeltemp3 + " CALL TEMP " + labeltemp2 + "( " + callingClass + " ";
         for (String tempArg : exprArgs) {
             this.spCode += tempArg + " ";
         }
         this.spCode += ")\n";
 
-        this.thisObject = false;
+        System.out.println("AAAA returning = " + labeltemp3);
 
+        this.thisObject = false;
         copyVal = false;
         return "TEMP " + labeltemp3;
     }
@@ -671,6 +684,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      * f0 -> <IDENTIFIER>
      */
     public String visit(Identifier n, String argu) throws Exception {
+        System.out.println("AAAABBBB");
         ArrayList<String> multiclassVars;
         String tempClass;
         boolean foundVar = false;
@@ -678,14 +692,17 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         int varOffset = 1;
 
         String storedIdentifier = n.f0.toString();
+        System.out.println("AAAA = " + this.storedClass);
 
         if (this.storedClass.equals("Main Method")) {
             this.actualObject = this.storedClass;
             return "TEMP " + this.tempVariables.get(storedIdentifier);
         }
 
-        if (this.tempVariables.containsKey(storedIdentifier)) {
+        if (this.tempVariables.containsKey(storedIdentifier) && !copyVal && !storeVal) {
+            System.out.println("LLLL = " + this.tempVariables.get(storedIdentifier));
             this.actualObject = Symboltable.get(this.storedClass).getMethodsMap().get(this.storedMethod).vars.get(storedIdentifier).getVarType();
+            System.out.println("LLLL = " + this.actualObject);
             return "TEMP " + this.tempVariables.get(storedIdentifier);
         }
 
@@ -732,6 +749,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
      */
     public String visit(ThisExpression n, String argu) throws Exception {
         this.thisObject = true;
+        System.out.println("HJHJHJHJHJ");
 
         return "TEMP 0";
     }
@@ -809,6 +827,7 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         int labeltemp4;
 
         String objectName = n.f1.f0.toString();
+        this.actualObject = objectName;
         classVariables = this.vVariables.get(objectName);
 
         labeltemp1 = tempcounter.getTemp();
@@ -816,13 +835,16 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
         labeltemp2 = tempcounter.getTemp();
         this.spCode += "MOVE TEMP " + labeltemp2 + " " + objectName + "_vTable\n";
         labeltemp3 = tempcounter.getTemp();
-        this.spCode += "HLOAD TEMP " + labeltemp3 + " " + labeltemp2 + " 0\n";
-        this.spCode += "HSTORE TEMP " + labeltemp1 + " 0 " + labeltemp3 + "\n";
-        labeltemp4 = tempcounter.getTemp();
-        this.spCode += "MOVE TEMP " + labeltemp4 + " 0\n";
+        this.spCode += "HLOAD TEMP " + labeltemp3 + " TEMP " + labeltemp2 + " 0\n";
+        this.spCode += "HSTORE TEMP " + labeltemp1 + " 0 TEMP " + labeltemp3 + "\n";
 
-        for (int i = 0; i < classVariables.size(); i++) {
-            this.spCode += "HSTORE TEMP " + labeltemp1 + " " + (i+1)*4 + " " + labeltemp4 + "\n";
+        if (classVariables.size() > 0) {
+            labeltemp4 = tempcounter.getTemp();
+            this.spCode += "MOVE TEMP " + labeltemp4 + " 0\n";
+
+            for (int i = 0; i < classVariables.size(); i++) {
+                this.spCode += "HSTORE TEMP " + labeltemp1 + " " + (i + 1) * 4 + " TEMP " + labeltemp4 + "\n";
+            }
         }
 
         return "TEMP " + labeltemp1;
@@ -847,5 +869,17 @@ public class CodeGeneration extends GJDepthFirst<String,String> {
 
         copyVal = false;
         return "TEMP " + labeltemp2;
+    }
+
+    /**
+     * f0 -> "("
+     * f1 -> Expression()
+     * f2 -> ")"
+     */
+    public String visit(BracketExpression n, String argu) throws Exception {
+        String expr;
+
+        expr = n.f1.accept(this,null);
+        return expr;
     }
 }
