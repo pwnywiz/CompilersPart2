@@ -31,9 +31,9 @@ class Main {
 				CodeGeneration code = new CodeGeneration(first.getClassMap(), second.getSymboltable(), vTable.getvVariables(), vTable.getvMethods());
 				root.accept(code, null);
 
-				System.out.println(code.getSpCode());
+//				System.out.println(code.getSpCode());
 
-				PrintWriter file = new PrintWriter("spiglet_code.txt", "UTF-8");
+				PrintWriter file = new PrintWriter("file" + (i+1) + ".spg", "UTF-8");
 				file.println(code.getSpCode());
 				file.close();
 

@@ -30,7 +30,6 @@ public class TempCounter {
             }
         }
 
-        System.out.println("Max method arguments = " + maxArgs);
         counter = maxArgs;
     }
 
